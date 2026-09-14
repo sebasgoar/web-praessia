@@ -1,0 +1,656 @@
+/* ============================================================
+   Praessia — pay.css
+   Estilos exclusivos para pay.html (checkout)
+   Depende de: style.css (variables de marca globales,
+   .main-header, tipografías Kiona/Heebo ya declaradas)
+   ============================================================ */
+
+/* ── Variables locales (mismo sistema que tienda.css) ────────── */
+:root {
+  --shop-cream:      #F0E7DA;
+  --shop-wine:       #6a2831;
+  --shop-gold:        #d4af37;
+  --shop-gold-soft:   #bfa76a;
+  --shop-dark:        #1a1a1a;
+  --shop-bg:          #f6f3ee;
+  --shop-white:       #ffffff;
+  --shop-text:        #2b2b2b;
+  --shop-muted:       #7a7a7a;
+  --shop-border:      #e2ddd4;
+  --shop-radius:      14px;
+  --shop-radius-sm:   8px;
+  --shop-shadow:      0 8px 32px rgba(0,0,0,0.08);
+  --shop-shadow-lg:   0 20px 60px rgba(0,0,0,0.14);
+  --shop-transition:  all 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+
+body {
+  background: var(--shop-bg);
+}
+
+/* ── Header — solo logo centrado ─────────────────────────────── */
+.pay-header .row {
+  justify-content: center;
+}
+
+.pay-header .logo {
+  margin: 0 auto;
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────── */
+.pay-breadcrumb {
+  background: var(--shop-white);
+  border-bottom: 1px solid var(--shop-border);
+  padding: 14px 0;
+}
+
+.pay-breadcrumb .container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.85rem;
+  color: var(--shop-muted);
+}
+
+.pay-breadcrumb a {
+  color: var(--shop-muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pay-breadcrumb a:hover { color: var(--shop-wine); }
+
+.pay-breadcrumb .current {
+  color: var(--shop-wine);
+  font-weight: 600;
+}
+
+/* ── Botón desplegable resumen (solo móvil/tablet) ───────────── */
+.pay-summary-toggle {
+  display: none;
+  width: 100%;
+  background: var(--shop-white);
+  border: none;
+  border-bottom: 1px solid var(--shop-border);
+  padding: 16px 20px;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Heebo', sans-serif;
+  cursor: pointer;
+}
+
+.pay-summary-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--shop-wine);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.pay-summary-toggle-label i.bi-bag { color: var(--shop-gold); }
+
+.toggle-caret {
+  transition: var(--shop-transition);
+  font-size: 0.8rem;
+}
+
+.pay-summary-toggle[aria-expanded="true"] .toggle-caret {
+  transform: rotate(180deg);
+}
+
+.pay-summary-toggle-total {
+  font-family: 'Kiona', sans-serif;
+  color: var(--shop-text);
+  font-size: 1rem;
+}
+
+/* ── Layout principal ────────────────────────────────────────── */
+.pay-layout {
+  padding: 40px 0 80px;
+}
+
+.pay-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.pay-form-col {
+  min-width: 0;
+}
+
+/* ── Secciones del formulario ────────────────────────────────── */
+.pay-section {
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--shop-border);
+}
+
+.pay-section:last-of-type {
+  border-bottom: none;
+}
+
+.pay-section-title {
+  font-family: 'Kiona', sans-serif;
+  font-size: 1.15rem;
+  color: var(--shop-wine);
+  margin-bottom: 18px;
+  letter-spacing: 0.02em;
+}
+
+.pay-section-desc {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.85rem;
+  color: var(--shop-muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.pay-section-desc i { color: var(--shop-gold); }
+
+/* ── Campos ───────────────────────────────────────────────────── */
+.pay-field {
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.pay-field--float {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.pay-field--float .pay-input {
+  width: 100%;
+  min-height: 52px;
+  padding-top: 22px;
+  padding-bottom: 10px;
+}
+
+.pay-field--float .pay-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+}
+
+.pay-field--float .pay-input::placeholder {
+  color: var(--shop-muted);
+  opacity: 1;
+}
+
+.pay-field--float .pay-input:focus::placeholder,
+.pay-field--float .pay-input:not(:placeholder-shown)::placeholder {
+  color: transparent;
+}
+
+.pay-field--float .pay-label,
+.pay-field--select .pay-label {
+  display: none;
+}
+
+.pay-row {
+  display: flex;
+  gap: 16px;
+}
+
+.pay-row .pay-field {
+  min-width: 0;
+}
+
+.pay-label {
+  display: block;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  color: var(--shop-text);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.pay-optional {
+  color: var(--shop-muted);
+  font-weight: 400;
+}
+
+.pay-input {
+  width: 100%;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.92rem;
+  color: var(--shop-text);
+  background: var(--shop-white);
+  border: 1px solid var(--shop-border);
+  border-radius: var(--shop-radius-sm);
+  padding: 12px 14px;
+  transition: var(--shop-transition);
+}
+
+.pay-input:focus {
+  outline: none;
+  border-color: var(--shop-gold-soft);
+  box-shadow: 0 0 0 3px rgba(191,167,106,0.18);
+}
+
+.pay-input:disabled {
+  background: #f1eee7;
+  color: var(--shop-muted);
+  cursor: not-allowed;
+}
+
+.pay-input.is-invalid {
+  border-color: #b3413a;
+}
+
+.pay-error {
+  display: block;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.75rem;
+  color: #b3413a;
+  margin-top: 5px;
+  min-height: 0;
+}
+
+/* ── Checkbox / radio personalizados ─────────────────────────── */
+.pay-check,
+.pay-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.85rem;
+  color: var(--shop-text);
+  cursor: pointer;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.pay-check input,
+.pay-radio input {
+  accent-color: var(--shop-wine);
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ── Tarjeta método de pago (Bold) ───────────────────────────── */
+.pay-method-card {
+  border: 1px solid var(--shop-gold-soft);
+  border-radius: var(--shop-radius);
+  background: var(--shop-white);
+  box-shadow: var(--shop-shadow);
+  overflow: hidden;
+}
+
+.pay-method-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  flex-wrap: wrap;
+}
+
+.pay-method-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--shop-wine);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pay-method-radio::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--shop-wine);
+}
+
+.pay-method-name {
+  font-family: 'Heebo', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--shop-text);
+  flex: 1;
+}
+
+.pay-method-icons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pay-badge {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.7rem;
+  background: var(--shop-cream);
+  color: var(--shop-wine);
+  border: 1px solid var(--shop-border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.pay-method-card-body {
+  background: var(--shop-bg);
+  border-top: 1px solid var(--shop-border);
+  padding: 12px 18px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  color: var(--shop-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pay-method-card-body i { color: var(--shop-gold-soft); }
+
+/* ── Dirección de facturación condicional ────────────────────── */
+.pay-billing-fields {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--shop-border);
+}
+
+/* ── Botón pagar ahora ────────────────────────────────────────── */
+.btn-pay-now {
+  width: 100%;
+  background: var(--shop-wine);
+  color: var(--shop-cream);
+  border: none;
+  border-radius: var(--shop-radius-sm);
+  padding: 16px;
+  font-family: 'Kiona', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: var(--shop-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-pay-now:hover {
+  background: #8a3040;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(106,40,49,0.3);
+}
+
+.btn-pay-now:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pay-legal-note {
+  text-align: center;
+  margin-top: 12px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.72rem;
+  color: var(--shop-muted);
+}
+
+/* ── Enlaces legales ──────────────────────────────────────────── */
+.pay-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--shop-border);
+}
+
+.pay-legal-links a {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.78rem;
+  color: var(--shop-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--shop-border);
+}
+
+.pay-legal-links a:hover {
+  color: var(--shop-wine);
+  text-decoration-color: var(--shop-wine);
+}
+
+/* ── Columna resumen (desktop, sticky) ───────────────────────── */
+/* 140px = altura real de .main-header (position: fixed), la misma
+   que compensa "body { padding-top: 140px; }" en el style.css general.
+   Si algún día cambias la altura del header, actualiza este valor. */
+:root {
+  --pay-header-offset: 140px;
+}
+
+.pay-summary-col {
+  position: relative;
+  align-self: start; /* evita que el grid estire esta columna a su altura completa */
+}
+
+.pay-summary-sticky {
+  position: sticky;
+  top: calc(var(--pay-header-offset) + 24px);
+  max-height: calc(100vh - var(--pay-header-offset) - 48px);
+  overflow-y: auto;
+  background: var(--shop-white);
+  border: 1px solid var(--shop-border);
+  border-radius: var(--shop-radius);
+  box-shadow: var(--shop-shadow);
+  padding: 24px;
+}
+
+.pay-summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.pay-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pay-summary-item-img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--shop-radius-sm);
+  background: var(--shop-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.pay-summary-item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pay-summary-item-img i {
+  color: var(--shop-gold-soft);
+  font-size: 1.2rem;
+}
+
+.pay-summary-item-qty {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--shop-wine);
+  color: var(--shop-cream);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.65rem;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+}
+
+.pay-summary-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pay-summary-item-name {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.82rem;
+  color: var(--shop-text);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pay-summary-item-ref {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.72rem;
+  color: var(--shop-muted);
+  margin: 0;
+}
+
+.pay-summary-item-price {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.84rem;
+  color: var(--shop-text);
+  white-space: nowrap;
+}
+
+.pay-summary-empty {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.85rem;
+  color: var(--shop-muted);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.pay-summary-totals {
+  border-top: 1px solid var(--shop-border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pay-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.88rem;
+  color: var(--shop-text);
+}
+
+.pay-summary-row--total {
+  border-top: 1px solid var(--shop-border);
+  margin-top: 4px;
+  padding-top: 12px;
+  font-family: 'Kiona', sans-serif;
+  font-size: 1.1rem;
+  color: var(--shop-wine);
+}
+
+.pay-secure-note {
+  text-align: center;
+  margin: 16px 0 0;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.72rem;
+  color: var(--shop-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.pay-secure-note i { color: var(--shop-gold-soft); }
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.toast-shop {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--shop-dark);
+  color: var(--shop-cream);
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.88rem;
+  z-index: 2000;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast-shop.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 991px) {
+  .pay-summary-toggle {
+    display: flex;
+  }
+
+  .pay-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .pay-summary-col {
+    order: -1;
+  }
+
+  .pay-summary-sticky {
+    position: static;
+    display: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .pay-summary-col.open .pay-summary-sticky {
+    display: block;
+  }
+
+  .pay-form-col {
+    padding-top: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .pay-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pay-section-title {
+    font-size: 1.05rem;
+  }
+
+  .pay-method-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

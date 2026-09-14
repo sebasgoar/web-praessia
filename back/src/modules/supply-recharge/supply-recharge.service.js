@@ -66,7 +66,7 @@ exports.getFragrance = async (pool) => {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.execute(
-        'SELECT id, fragancia FROM inventario WHERE estado = 1 ORDER BY fragancia ASC'
+        'SELECT id, insumo FROM inventario WHERE estado = 1 ORDER BY insumo ASC'
       );
       return rows;
     } finally {
