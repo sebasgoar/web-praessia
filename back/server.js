@@ -1,17 +1,28 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3008;
 
 /* Middlewares */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  const origin = process.env.ALLOWED_ORIGIN || req.headers.origin;
+  res.header('Access-Control-Allow-Origin', origin || '*');
+  res.header('Vary', 'Origin');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, PATCH, DELETE');
+  res.header('Access-Control-Max-Age', '86400');
+  if (origin) {
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
   next();
 });
 
@@ -29,6 +40,10 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
+
+/* Servir archivos estáticos del frontend (carpeta padre) para pruebas locales */
+const path = require('path');
+app.use(express.static(path.join(__dirname, '..')));
 
 async function testConnection() {
   const connection = await pool.getConnection();
@@ -50,7 +65,13 @@ app.get('/db-test', async (req, res) => {
 });
 
 /* Rutas */
+const loginRoutes = require('./src/modules/login/login.routes.js');
+const recordSaleRoutes = require('./src/modules/record-sale/record-sale.routes.js');
+const authMiddleware = require('./src/modules/login/auth.middleware.js');
 const supplyRechargeRoutes = require('./src/modules/supply-recharge/supply-recharge.routes.js');
+
+app.use('/login', loginRoutes);
+app.use('/record-sale', authMiddleware.authenticate, recordSaleRoutes);
 app.use('/supply-recharge', supplyRechargeRoutes);
 
 /* Pool disponible globalmente para rutas */
