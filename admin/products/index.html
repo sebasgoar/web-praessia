@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos — Admin Praessia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/admin/admin-common.css">
+    <style>
+        .page-wrapper {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 28px 36px;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header-eyebrow {
+            font-size: 0.68rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold-soft);
+            margin-bottom: 6px;
+        }
+
+        .page-header-title {
+            font-family: 'Kiona', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 0.06em;
+            color: var(--wine);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .product-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: var(--cream);
+            border: 1px solid var(--border);
+        }
+
+        .product-thumb-placeholder {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold-soft);
+            font-size: 1.2rem;
+        }
+
+        .gender-badge {
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .gender-masculina { background: #e3f2fd; color: #1565c0; }
+        .gender-femenina { background: #fce4ec; color: #c2185b; }
+        .gender-unisex { background: #f3e5f5; color: #7b1fa2; }
+
+        .btn-action {
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        /* Styling Modal Praessia */
+        .modal-content.praessia-modal {
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .praessia-modal .modal-header {
+            background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine) 100%);
+            color: var(--cream);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 28px;
+        }
+
+        .praessia-modal .modal-title {
+            font-family: 'Kiona', sans-serif;
+            font-size: 1.25rem;
+            letter-spacing: 0.06em;
+            color: var(--cream);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .praessia-modal .modal-sub {
+            font-size: 0.83rem;
+            color: rgba(240, 231, 218, 0.85);
+            margin-top: 4px;
+            margin-bottom: 0;
+        }
+
+        .praessia-modal .modal-body {
+            padding: 28px 32px;
+            background: #fdfbf7;
+        }
+
+        .praessia-modal .modal-footer {
+            padding: 18px 32px;
+            background: #f6f3ee;
+            border-top: 1px solid var(--border);
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .praessia-modal .field-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--wine-dark);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .praessia-modal .form-control,
+        .praessia-modal .form-select {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            background: #ffffff;
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+
+        .praessia-modal .form-control:focus,
+        .praessia-modal .form-select:focus {
+            border-color: var(--gold-soft);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+            outline: none;
+        }
+
+        .btn-pr-wine {
+            background: var(--wine);
+            color: var(--cream);
+            border: none;
+            padding: 10px 26px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-pr-wine:hover {
+            background: var(--wine-dark);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(106, 40, 49, 0.3);
+        }
+
+        .btn-pr-outline {
+            background: transparent;
+            color: var(--wine-dark);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pr-outline:hover {
+            background: rgba(106, 40, 49, 0.05);
+            color: var(--wine);
+            border-color: var(--wine);
+        }
+
+        .section-header-badge {
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--gold-soft);
+            margin-top: 14px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header-badge::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="/assets/img/imagotipo.svg" alt="Praessia logo" class="logo">
+                </div>
+                <div class="col">
+                    <nav class="nav-container">
+                        <ul class="nav-menu">
+                            <li><a href="/">Inicio</a></li>
+                            <li><a href="/store/">Tienda</a></li>
+                            <li><a href="/about-us/">¿Quiénes somos?</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-name">PRAESSIA</div>
+                <div class="sidebar-brand-sub">Admin</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">General</div>
+                <a class="sidebar-link" href="/admin/dashboard/">
+                    <i class="bi bi-grid-1x2"></i> Dashboard
+                </a>
+
+                <div class="nav-section-label">Inventario</div>
+                <a class="sidebar-link" href="/admin/inventory/">
+                    <i class="bi bi-boxes"></i> Stock insumos
+                </a>
+                <a class="sidebar-link" href="/admin/production/">
+                    <i class="bi bi-droplet"></i> Producción
+                </a>
+                <a class="sidebar-link" href="/admin/supply-recharge/">
+                    <i class="bi bi-arrow-repeat"></i> Recargar insumos
+                </a>
+
+                <div class="nav-section-label">Ventas</div>
+                <a class="sidebar-link" href="/admin/record-sale/">
+                    <i class="bi bi-bag-check"></i> Registrar venta
+                </a>
+                <a class="sidebar-link" href="/admin/history/">
+                    <i class="bi bi-clock-history"></i> Historial
+                </a>
+
+                <div class="nav-section-label">Tienda</div>
+                <a class="sidebar-link active" href="/admin/products/">
+                    <i class="bi bi-flower1"></i> Catálogo / Productos
+                </a>
+                <a class="sidebar-link" href="/admin/reviews/">
+                    <i class="bi bi-chat-heart"></i> Reseñas
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="btnLogout">
+                    <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <span class="topbar-title">Gestión de Catálogo de Productos</span>
+                <span class="topbar-date" id="topbarDate"></span>
+            </div>
+
+            <div class="page-wrapper">
+                <div class="page-header-row">
+                    <div>
+                        <div class="page-header-eyebrow">MÓDULO DE CATÁLOGO</div>
+                        <h1 class="page-header-title">
+                            <i class="bi bi-flower1"></i> Catálogo de Fragancias
+                        </h1>
+                        <p class="page-header-desc">
+                            Administra las fragancias de la tienda, actualiza precios, imágenes y fichas técnicas.
+                        </p>
+                    </div>
+                    <button class="btn-primary-praessia btn-add-modal-trigger" id="btnOpenAddModal">
+                        <i class="bi bi-plus-lg me-2"></i>Agregar Nuevo Producto
+                    </button>
+                </div>
+
+                <!-- Buscador y Filtro -->
+                <div class="admin-table-wrap mb-4" style="padding: 16px 24px;">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                                <input type="text" id="productSearch" class="form-control border-start-0 ps-0" placeholder="Buscar por nombre o ID...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select id="genderFilter" class="form-select">
+                                <option value="all">Todos los géneros</option>
+                                <option value="masculina">Masculina</option>
+                                <option value="femenina">Femenina</option>
+                                <option value="unisex">Unisex</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-end text-muted small" id="prodCount">
+                            0 productos
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Productos -->
+                <div class="admin-table-wrap">
+                    <div class="table-responsive">
+                        <table class="admin-table w-100">
+                            <thead>
+                                <tr>
+                                    <th style="width:70px">ID</th>
+                                    <th style="width:70px">Foto</th>
+                                    <th>Nombre del Producto</th>
+                                    <th style="width:130px">Precio</th>
+                                    <th style="width:130px">Género</th>
+                                    <th style="width:110px">Estado</th>
+                                    <th style="width:120px" class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">Cargando catálogo...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL CREAR / EDITAR PRODUCTO -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content praessia-modal">
+                <div class="modal-header d-block">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="modal-title" id="productModalTitle">
+                            <i class="bi bi-flower1 me-2"></i> Editar Producto
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <p class="modal-sub">
+                        Completa la información básica y la ficha técnica del producto para la tienda virtual.
+                    </p>
+                </div>
+                <form id="productForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="prodId">
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="field-label" for="prodName">NOMBRE DEL PRODUCTO / INSPIRACIÓN <span class="text-danger">*</span></label>
+                                <input type="text" id="prodName" class="form-control" placeholder="Ej: Inspiración olfativa: One Million" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="field-label" for="prodPrice">PRECIO ($ COP) <span class="text-danger">*</span></label>
+                                <input type="number" id="prodPrice" class="form-control" placeholder="139900" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodGender">GÉNERO <span class="text-danger">*</span></label>
+                                <select id="prodGender" class="form-select" required>
+                                    <option value="masculina">Masculina</option>
+                                    <option value="femenina">Femenina</option>
+                                    <option value="unisex">Unisex</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodEstado">ESTADO EN TIENDA</label>
+                                <select id="prodEstado" class="form-select">
+                                    <option value="1">Activo (Visible en tienda)</option>
+                                    <option value="0">Inactivo (Oculto)</option>
+                                </select>
+                            </div>
+
+                            <!-- Cargar Foto -->
+                            <div class="col-12">
+                                <label class="field-label">IMAGEN DEL PRODUCTO</label>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-auto">
+                                        <div id="imagePreviewWrap">
+                                            <img id="imgPreview" class="product-thumb" src="" style="display:none; width:64px; height:64px; border-radius:10px; object-fit:cover;">
+                                            <div id="imgPreviewPlaceholder" class="product-thumb-placeholder" style="width:64px; height:64px; border-radius:10px;">
+                                                <i class="bi bi-image" style="font-size:1.4rem;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <input type="file" id="prodImgFile" class="form-control mb-2" accept="image/*">
+                                        <input type="text" id="prodImgPath" class="form-control form-control-sm" placeholder="O ingresa ruta de la imagen: /assets/img/perfumes/nombre.png">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="section-header-badge">
+                                    <i class="bi bi-sliders me-1"></i> Ficha Técnica y Notas Olfativas
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodFamilia">FAMILIA OLFATIVA</label>
+                                <input type="text" id="prodFamilia" class="form-control" placeholder="Ej: Amaderado especiado · Oriental">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodConcentracion">CONCENTRACIÓN</label>
+                                <input type="text" id="prodConcentracion" class="form-control" placeholder="Extrait de Parfum">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodClima">CLIMA IDEAL</label>
+                                <input type="text" id="prodClima" class="form-control" placeholder="Ej: Climas templados y fríos">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodOcasion">OCASIÓN DE USO</label>
+                                <input type="text" id="prodOcasion" class="form-control" placeholder="Ej: Salidas sociales, eventos, citas">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="field-label" for="prodDescripcion">DESCRIPCIÓN EDITORIAL</label>
+                                <textarea id="prodDescripcion" class="form-control" rows="3" placeholder="Descripción sensorial de la fragancia..."></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodSalida">NOTAS DE SALIDA</label>
+                                <input type="text" id="prodSalida" class="form-control" placeholder="Ej: Menta, mandarina, canela">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodCorazon">NOTAS DE CORAZÓN</label>
+                                <input type="text" id="prodCorazon" class="form-control" placeholder="Ej: Rosa, pachulí, jengibre">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodFondo">NOTAS DE FONDO</label>
+                                <input type="text" id="prodFondo" class="form-control" placeholder="Ej: Ámbar, vetiver, cedro">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="prodTags">TAGS DE BÚSQUEDA (SEPARADOS POR COMA)</label>
+                                <input type="text" id="prodTags" class="form-control" placeholder="Ej: especiado, oriental, intenso, memorable">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-pr-outline" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-pr-wine" id="btnSaveProduct">
+                            <i class="bi bi-check-circle me-1"></i> Guardar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/admin/products/products.js"></script>
+</body>
+
+</html>

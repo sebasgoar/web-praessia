@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Venta — Admin Praessia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+    <link href="/admin/admin-common.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="/assets/img/imagotipo.svg" alt="Praessia logo" class="logo">
+                </div>
+                <div class="col">
+                    <nav class="nav-container">
+                        <ul class="nav-menu">
+                            <li><a href="/">Inicio</a></li>
+                            <li><a href="/store">Tienda</a></li>
+                            <li><a href="/about-us/">¿Quiénes somos?</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="adminPanel">
+        <div class="admin-layout">
+            <aside class="admin-sidebar">
+                <div class="sidebar-brand">
+                    <div class="sidebar-brand-name">PRAESSIA</div>
+                    <div class="sidebar-brand-sub">Admin</div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section-label">General</div>
+                    <a class="sidebar-link" href="/admin/dashboard/">
+                        <i class="bi bi-grid-1x2"></i> Dashboard
+                    </a>
+
+                    <div class="nav-section-label">Inventario</div>
+                    <a class="sidebar-link" href="/admin/inventory/">
+                        <i class="bi bi-boxes"></i> Stock insumos
+                    </a>
+                    <a class="sidebar-link" href="/admin/production/">
+                        <i class="bi bi-droplet"></i> Producción
+                    </a>
+                    <a class="sidebar-link" href="/admin/supply-recharge/">
+                        <i class="bi bi-arrow-repeat"></i> Recargar insumos
+                    </a>
+
+                    <div class="nav-section-label">Ventas</div>
+                    <a class="sidebar-link active" href="/admin/record-sale/">
+                        <i class="bi bi-bag-check"></i> Registrar venta
+                    </a>
+                    <a class="sidebar-link" href="/admin/history/">
+                        <i class="bi bi-clock-history"></i> Historial
+                    </a>
+
+                    <div class="nav-section-label">Tienda</div>
+                    <a class="sidebar-link" href="/admin/products/">
+                        <i class="bi bi-flower1"></i> Catálogo / Productos
+                    </a>
+                    <a class="sidebar-link" href="/admin/reviews/">
+                        <i class="bi bi-chat-heart"></i> Reseñas
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="btn-logout" id="btnLogout">
+                        <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+                    </button>
+                </div>
+            </aside>
+
+            <main class="admin-main">
+                <div class="admin-topbar">
+                    <span class="topbar-title">Registrar Venta</span>
+                    <span class="topbar-date" id="topbarDate"></span>
+                </div>
+
+                <div class="admin-content">
+                    <section class="admin-section active" id="section-ventas">
+                        <div class="admin-form-card">
+                            <div class="admin-form-title">
+                                <i class="bi bi-bag-check me-2"></i>Registrar venta manual
+                            </div>
+                            <p style="font-size:0.85rem; color:var(--muted); margin-bottom:24px;">
+                                Para ventas por redes sociales, WhatsApp o presencial.
+                            </p>
+
+                            <!-- Stepper -->
+                            <div class="sales-stepper">
+                                <div class="stepper-step active" id="stepper1">
+                                    <div class="stepper-dot">1</div>
+                                    <span class="stepper-label">Datos del cliente</span>
+                                </div>
+                                <div style="flex:1; height:2px; background:var(--border);"></div>
+                                <div class="stepper-step" id="stepper2">
+                                    <div class="stepper-dot">2</div>
+                                    <span class="stepper-label">Detalle de venta</span>
+                                </div>
+                            </div>
+
+                            <!-- PASO 1: Información del cliente -->
+                            <div id="step-1-client">
+                                <div class="sale-section-header">Información del cliente</div>
+
+                                <div class="sale-form-row" style="grid-template-columns: 200px 1fr; margin-bottom:14px;">
+                                    <div class="field-group">
+                                        <label class="field-label required">Tipo de documento</label>
+                                        <select id="clientDocType" class="field-select" required>
+                                            <option value="">Selecciona...</option>
+                                            <option value="CC">Cédula de Ciudadanía</option>
+                                            <option value="CE">Cédula de Extranjería</option>
+                                            <option value="NIT">NIT</option>
+                                            <option value="PP">Pasaporte</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label required">Número de documento</label>
+                                        <input type="text" id="clientDoc" class="field-input"
+                                            placeholder="Ej: 1023456789" inputmode="numeric" pattern="[0-9]*"
+                                            oninput="this.value=this.value.replace(/\D/g,'')" maxlength="15" required>
+                                    </div>
+                                </div>
+
+                                <div class="sale-form-row" style="grid-template-columns: 1fr 1fr; margin-bottom:14px;">
+                                    <div class="field-group">
+                                        <label class="field-label required">Nombre</label>
+                                        <input type="text" id="clientName" class="field-input" placeholder="Nombre" required>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label required">Apellido</label>
+                                        <input type="text" id="clientLastname" class="field-input" placeholder="Apellido" required>
+                                    </div>
+                                </div>
+
+                                <div class="sale-form-row" style="grid-template-columns: 200px 1fr; margin-bottom:14px;">
+                                    <div class="field-group">
+                                        <label class="field-label required">Teléfono</label>
+                                        <input type="text" id="clientPhone" class="field-input"
+                                            placeholder="Ej: 3008234567" inputmode="numeric" pattern="[0-9]*"
+                                            oninput="this.value=this.value.replace(/\D/g,'')" maxlength="12" required>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label required">Correo electrónico</label>
+                                        <input type="email" id="clientEmail" class="field-input" placeholder="cliente@ejemplo.com" required>
+                                        <span id="emailHint" style="display:none; font-size:0.75rem; color:var(--red, #c0392b); margin-top:4px; letter-spacing:0.02em;"></span>
+                                    </div>
+                                </div>
+
+                                <div class="sale-form-row" style="grid-template-columns: 1fr 1fr; margin-bottom:14px;">
+                                    <div class="field-group">
+                                        <label class="field-label required">Departamento</label>
+                                        <select id="clientDepartment" class="field-select" required>
+                                            <option value="">Selecciona departamento...</option>
+                                            <option value="Amazonas">Amazonas</option>
+                                            <option value="Antioquia">Antioquia</option>
+                                            <option value="Arauca">Arauca</option>
+                                            <option value="Atlántico">Atlántico</option>
+                                            <option value="Bolívar">Bolívar</option>
+                                            <option value="Boyacá">Boyacá</option>
+                                            <option value="Caldas">Caldas</option>
+                                            <option value="Caquetá">Caquetá</option>
+                                            <option value="Casanare">Casanare</option>
+                                            <option value="Cauca">Cauca</option>
+                                            <option value="Cesar">Cesar</option>
+                                            <option value="Chocó">Chocó</option>
+                                            <option value="Córdoba">Córdoba</option>
+                                            <option value="Cundinamarca">Cundinamarca</option>
+                                            <option value="Guainía">Guainía</option>
+                                            <option value="Guaviare">Guaviare</option>
+                                            <option value="Huila">Huila</option>
+                                            <option value="La Guajira">La Guajira</option>
+                                            <option value="Magdalena">Magdalena</option>
+                                            <option value="Meta">Meta</option>
+                                            <option value="Nariño">Nariño</option>
+                                            <option value="Norte de Santander">Norte de Santander</option>
+                                            <option value="Putumayo">Putumayo</option>
+                                            <option value="Quindío">Quindío</option>
+                                            <option value="Risaralda">Risaralda</option>
+                                            <option value="San Andrés y Providencia">San Andrés y Providencia</option>
+                                            <option value="Santander">Santander</option>
+                                            <option value="Sucre">Sucre</option>
+                                            <option value="Tolima">Tolima</option>
+                                            <option value="Valle del Cauca">Valle del Cauca</option>
+                                            <option value="Vaupés">Vaupés</option>
+                                            <option value="Vichada">Vichada</option>
+                                            <option value="Bogotá D.C.">Bogotá D.C.</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label required">Municipio</label>
+                                        <select id="clientMunicipality" class="field-select" required>
+                                            <option value="">Selecciona primero el departamento...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="sale-form-row" style="grid-template-columns: 1fr; margin-bottom:14px;">
+                                    <div class="field-group">
+                                        <label class="field-label required">Dirección de entrega</label>
+                                        <input type="text" id="clientAddress" class="field-input" placeholder="Ej: Calle 123 # 45-67, Apto 302" required>
+                                    </div>
+                                </div>
+
+                                <div class="sale-form-row" style="grid-template-columns: 220px 1fr; margin-bottom:14px;">
+                                    <div class="field-group">
+                                        <label class="field-label required">Barrio</label>
+                                        <input type="text" id="clientNeighborhood" class="field-input" placeholder="Ej: El Poblado" required>
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Información adicional <span style="font-size:0.7rem; color:var(--muted); text-transform:none; letter-spacing:0;">(opcional)</span></label>
+                                        <input type="text" id="clientNotes" class="field-input" placeholder="Apartamento, indicaciones, referencia...">
+                                    </div>
+                                </div>
+
+                                <div class="btn-step-nav" style="margin-top:20px;">
+                                    <button class="btn-next" id="btnStep1Continue">
+                                        Continuar <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- PASO 2: Detalle + Comercial + Resumen -->
+                            <div id="step-2-details" style="display:none;">
+                                <div class="sale-detail-layout">
+                                    <div class="sale-detail-main">
+                                        <div class="sale-section-header">Detalle de la venta</div>
+                                        <div id="productsContainer"></div>
+
+                                        <button type="button" class="btn-add-product" id="btnAddProduct">
+                                            <i class="bi bi-plus-circle"></i> Añadir otro producto
+                                        </button>
+
+                                        <div class="sale-section-header" style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
+                                            Información comercial
+                                        </div>
+
+                                        <div class="sale-form-row" style="grid-template-columns: 1fr 1fr; margin-bottom:14px;">
+                                            <div class="field-group">
+                                                <label class="field-label required">Canal de venta</label>
+                                                <select id="saleChannel" class="field-select" required>
+                                                    <option value="">Selecciona canal...</option>
+                                                    <option value="instagram">Instagram</option>
+                                                    <option value="whatsapp">WhatsApp</option>
+                                                    <option value="presencial">Presencial / Voz a voz</option>
+                                                    <option value="vendedor_externo">Vendedor externo</option>
+                                                </select>
+                                            </div>
+                                            <div class="field-group" id="saleExternalSellerRow" style="display:none;">
+                                                <label class="field-label">Vendedor externo</label>
+                                                <select id="saleExternalSeller" class="field-select">
+                                                    <option value="">Selecciona vendedor...</option>
+                                                    <option value="Vendedor Externo 1">Vendedor Externo 1</option>
+                                                    <option value="Vendedor Externo 2">Vendedor Externo 2</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="sale-form-row" style="grid-template-columns: 1fr 1fr; margin-bottom:14px;">
+                                            <div class="field-group">
+                                                <label class="field-label required">Medio de pago</label>
+                                                <select id="salePaymentMethod" class="field-select" required>
+                                                    <option value="">Selecciona medio...</option>
+                                                    <option value="transferencia">Transferencia directa</option>
+                                                    <option value="efectivo">Efectivo</option>
+                                                    <option value="bold">Bold</option>
+                                                </select>
+                                            </div>
+                                            <div class="field-group">
+                                                <label class="field-label required">Asesor</label>
+                                                <select id="saleAdvisor" class="field-select" required>
+                                                    <option value="">Selecciona asesor...</option>
+                                                    <option value="Asesor 1">Asesor 1</option>
+                                                    <option value="Asesor 2">Asesor 2</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="sale-summary-sidebar">
+                                        <div class="summary-card-title">
+                                            <i class="bi bi-receipt me-2"></i>Resumen del pedido
+                                        </div>
+
+                                        <div id="summaryEmpty" style="display:flex; flex-direction:column; align-items:center; padding:28px 12px; color:var(--muted); font-size:0.82rem; text-align:center; gap:8px;">
+                                            <i class="bi bi-bag" style="font-size:1.6rem; opacity:0.3;"></i>
+                                            Agrega productos para ver el resumen
+                                        </div>
+
+                                        <div style="overflow-x:auto;">
+                                            <table class="summary-table" style="width:100%; border-collapse:collapse;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align:left; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0 0 8px; border-bottom:1px solid var(--border); font-weight:500;">Producto</th>
+                                                        <th style="text-align:right; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0 0 8px; border-bottom:1px solid var(--border); font-weight:500;">P. Unit.</th>
+                                                        <th style="text-align:center; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0 0 8px; border-bottom:1px solid var(--border); font-weight:500;">Qty</th>
+                                                        <th style="text-align:right; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0 0 8px; border-bottom:1px solid var(--border); font-weight:500;">Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="summaryTbody"></tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="summary-grand-total">
+                                            <span>Total del pedido</span>
+                                            <span id="summaryGrandTotal">$0</span>
+                                        </div>
+
+                                        <p style="font-size:0.75rem; color:var(--muted); margin-top:12px; line-height:1.5;">
+                                            El valor total se calcula automáticamente a partir de los productos ingresados.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="btn-step-nav" style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
+                                    <button class="btn-prev" id="btnStep2Back">
+                                        <i class="bi bi-arrow-left"></i> Atrás
+                                    </button>
+                                    <button class="btn-pr btn-pr-wine" id="btnSaveSale">
+                                        <i class="bi bi-check-circle"></i> Registrar venta
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="admin-toast" id="adminToast"></div>
+
+    <script>
+        (function() {
+            const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname) || window.location.protocol === 'file:';
+            window.__BACKEND_BASE__ = isLocal ? 'http://localhost:3008' : '/api';
+        })();
+    </script>
+    <script src="/data-perfumes.js"></script>
+    <script src="/admin/admin-sales-flow.js"></script>
+    <script src="/admin/admin-backend.js"></script>
+    <script src="/admin/admin.js"></script>
+    <script src="record-sale.js"></script>
+</body>
+
+</html>

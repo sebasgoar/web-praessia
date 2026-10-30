@@ -526,10 +526,31 @@ body {
 }
 
 .pay-summary-item-price {
-  font-family: 'Heebo', sans-serif;
-  font-size: 0.84rem;
-  color: var(--shop-text);
+  font-family: 'Kiona', sans-serif;
+  font-size: 0.95rem;
+  color: var(--shop-wine);
   white-space: nowrap;
+  text-align: right;
+  font-weight: 600;
+}
+
+.pay-summary-item-detail {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.72rem;
+  color: var(--shop-muted);
+  margin: 3px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pay-summary-qty-badge {
+  font-weight: 600;
+  color: var(--shop-text);
+}
+
+.pay-summary-unit-price {
+  color: var(--shop-muted);
 }
 
 .pay-summary-empty {
