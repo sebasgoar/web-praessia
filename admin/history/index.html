@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas — Admin Praessia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+    <link href="/admin/admin-common.css" rel="stylesheet">
+    <style>
+        .page-wrapper {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 28px 36px;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-header-eyebrow {
+            font-size: 0.68rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold-soft);
+            margin-bottom: 6px;
+        }
+
+        .page-header-title {
+            font-family: 'Kiona', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 0.06em;
+            color: var(--wine);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .page-header-desc {
+            font-size: 0.84rem;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .badge-web {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(30, 60, 114, 0.25);
+            white-space: nowrap;
+        }
+
+        .badge-advisor {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: rgba(106, 40, 49, 0.08);
+            color: var(--wine-dark);
+            border: 1px solid rgba(106, 40, 49, 0.18);
+            white-space: nowrap;
+        }
+
+        .status-badge-approved {
+            background: rgba(45, 122, 79, 0.12);
+            color: #1e6b3c;
+            border: 1px solid rgba(45, 122, 79, 0.25);
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .status-badge-pending {
+            background: rgba(230, 126, 34, 0.12);
+            color: #d35400;
+            border: 1px solid rgba(230, 126, 34, 0.25);
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .badge-despacho-ok {
+            background: rgba(46, 204, 113, 0.15);
+            color: #27ae60;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-despacho-warn {
+            background: rgba(231, 76, 60, 0.12);
+            color: #c0392b;
+            border: 1px solid rgba(231, 76, 60, 0.25);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .items-purchased-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 240px;
+        }
+
+        .item-purchased-pill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #ffffff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.82rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .item-purchased-name {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .item-purchased-qty {
+            font-weight: 700;
+            color: var(--wine);
+            background: var(--cream);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .item-purchased-price {
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .sale-row-clickable {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .sale-row-clickable:hover {
+            background-color: rgba(106, 40, 49, 0.05) !important;
+        }
+
+        /* Styling Modal Praessia */
+        .modal-content.praessia-modal {
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .praessia-modal .modal-header {
+            background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine) 100%);
+            color: var(--cream);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 28px;
+        }
+
+        .praessia-modal .modal-title {
+            font-family: 'Kiona', sans-serif;
+            font-size: 1.3rem;
+            letter-spacing: 0.06em;
+            color: var(--cream);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .praessia-modal .modal-sub {
+            font-size: 0.83rem;
+            color: rgba(240, 231, 218, 0.8);
+            margin-top: 4px;
+            margin-bottom: 0;
+        }
+
+        .praessia-modal .modal-body {
+            padding: 28px;
+            background: #fdfbf7;
+        }
+
+        .praessia-modal .modal-footer {
+            padding: 18px 28px;
+            background: #f6f3ee;
+            border-top: 1px solid var(--border);
+            justify-content: flex-start;
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="/assets/img/imagotipo.svg" alt="Praessia logo" class="logo">
+                </div>
+                <div class="col">
+                    <nav class="nav-container">
+                        <ul class="nav-menu">
+                            <li><a href="/">Inicio</a></li>
+                            <li><a href="/store">Tienda</a></li>
+                            <li><a href="/about-us/">¿Quiénes somos?</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="adminPanel">
+        <div class="admin-layout">
+            <aside class="admin-sidebar">
+                <div class="sidebar-brand">
+                    <div class="sidebar-brand-name">PRAESSIA</div>
+                    <div class="sidebar-brand-sub">Admin</div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section-label">General</div>
+                    <a class="sidebar-link" href="/admin/dashboard/">
+                        <i class="bi bi-grid-1x2"></i> Dashboard
+                    </a>
+
+                    <div class="nav-section-label">Inventario</div>
+                    <a class="sidebar-link" href="/admin/inventory/">
+                        <i class="bi bi-boxes"></i> Stock insumos
+                    </a>
+                    <a class="sidebar-link" href="/admin/production/">
+                        <i class="bi bi-droplet"></i> Producción
+                    </a>
+                    <a class="sidebar-link" href="/admin/supply-recharge/">
+                        <i class="bi bi-arrow-repeat"></i> Recargar insumos
+                    </a>
+
+                    <div class="nav-section-label">Ventas</div>
+                    <a class="sidebar-link" href="/admin/record-sale/">
+                        <i class="bi bi-bag-check"></i> Registrar venta
+                    </a>
+                    <a class="sidebar-link active" href="/admin/history/">
+                        <i class="bi bi-clock-history"></i> Historial
+                    </a>
+
+                    <div class="nav-section-label">Tienda</div>
+                    <a class="sidebar-link" href="/admin/products/">
+                        <i class="bi bi-flower1"></i> Catálogo / Productos
+                    </a>
+                    <a class="sidebar-link" href="/admin/reviews/">
+                        <i class="bi bi-chat-heart"></i> Reseñas
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="btn-logout" id="btnLogout">
+                        <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+                    </button>
+                </div>
+            </aside>
+
+            <main class="admin-main">
+                <div class="admin-topbar">
+                    <span class="topbar-title">Historial de Movimientos</span>
+                    <span class="topbar-date" id="topbarDate"></span>
+                </div>
+
+                <div class="page-wrapper">
+                    <div class="page-header-row">
+                        <div>
+                            <p class="page-header-eyebrow">Ventas & Movimientos · Praessia</p>
+                            <h1 class="page-header-title">
+                                <i class="bi bi-clock-history"></i> Historial de Ventas
+                            </h1>
+                            <p class="page-header-desc">
+                                Haz clic sobre cualquier venta para editar el estado del despacho o agregar comentarios.
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <select id="historialFilter" class="field-select" style="max-width:180px; margin:0;">
+                                <option value="all">Todas las ventas</option>
+                                <option value="APROBADA">Aprobadas</option>
+                                <option value="PENDIENTE">Pendientes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-table-wrap" style="width: 100%;">
+                        <div class="admin-table-header">
+                            <span class="admin-table-title">
+                                <i class="bi bi-receipt me-2"></i>Historial de Ventas Realizadas (haz clic para editar)
+                            </span>
+                        </div>
+                        <div style="overflow-x:auto; width: 100%;">
+                            <table class="admin-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Cliente</th>
+                                        <th>Productos Comprados</th>
+                                        <th>Total Venta</th>
+                                        <th>Asesor / Vendedor</th>
+                                        <th>Canal y Pago</th>
+                                        <th>Estado transacción</th>
+                                        <th>Despacho</th>
+                                        <th>Nota</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesHistoryBody">
+                                    <tr>
+                                        <td colspan="10">
+                                            <div class="empty-state">
+                                                <i class="bi bi-clock-history"></i>
+                                                Cargando historial de ventas...
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Detalle y Edición de Venta -->
+    <div class="modal fade" id="modalEditSale" tabindex="-1" aria-labelledby="modalEditSaleLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content praessia-modal">
+                <div class="modal-header d-block">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="modal-title" id="modalEditSaleLabel">
+                            <i class="bi bi-receipt me-2"></i> Detalle de Venta #<span id="modalSaleIdTitle"></span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <p class="modal-sub" id="modalSaleSubtitle">
+                        Detalle completo de la transacción y gestión de despacho.
+                    </p>
+                </div>
+                <div class="modal-body" style="background:#fdfbf7; padding: 24px 32px;">
+                    <input type="hidden" id="editSaleId">
+
+                    <!-- SECCIÓN INFORMATIVA 1: DATOS DEL CLIENTE (SOLO LECTURA) -->
+                    <div class="mb-4 p-3 rounded-3" style="background:#ffffff; border:1px solid var(--border);">
+                        <div class="border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold color-wine small text-uppercase" style="letter-spacing:0.1em;">
+                                <i class="bi bi-person-vcard me-1"></i> Información del Cliente
+                            </span>
+                            <span id="viewClientDoc" class="badge bg-secondary-subtle text-secondary font-heebo"></span>
+                        </div>
+                        <div class="row g-2" style="font-size:0.88rem;">
+                            <div class="col-md-6">
+                                <div class="small text-muted">Nombre Completo</div>
+                                <div class="fw-bold color-wine-dark" id="viewClientName">—</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="small text-muted">Teléfono / Celular</div>
+                                <div class="fw-bold" id="viewClientPhone">—</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="small text-muted">Correo Electrónico</div>
+                                <div class="fw-bold" id="viewClientEmail">—</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="small text-muted">Ubicación y Dirección</div>
+                                <div class="fw-bold" id="viewClientAddress">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN INFORMATIVA 2: PRODUCTOS COMPRADOS (SOLO LECTURA) -->
+                    <div class="mb-4 p-3 rounded-3" style="background:#ffffff; border:1px solid var(--border);">
+                        <div class="border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold color-wine small text-uppercase" style="letter-spacing:0.1em;">
+                                <i class="bi bi-bag-check me-1"></i> Detalle de Productos
+                            </span>
+                            <span id="viewTotalValue" class="fw-bold text-wine fs-5 font-kiona"></span>
+                        </div>
+                        <div id="viewSaleItemsContainer" class="d-flex flex-column gap-2 mt-2">
+                            <!-- Se genera dinámicamente por JS -->
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-2 border-top small text-muted gap-2">
+                            <div><i class="bi bi-shop me-1"></i> Canal: <span id="viewSaleChannel" class="fw-bold text-dark"></span></div>
+                            <div><i class="bi bi-credit-card me-1"></i> Pago: <span id="viewPaymentMethod" class="fw-bold text-dark"></span></div>
+                            <div><i class="bi bi-person me-1"></i> Vendedor: <span id="viewSaleAdvisor" class="fw-bold text-dark"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN EDITABLE: ESTADOS Y NOTAS DE GESTIÓN -->
+                    <div class="p-3 rounded-3" style="background: rgba(106, 40, 49, 0.04); border:1px solid rgba(106, 40, 49, 0.15);">
+                        <div class="fw-bold color-wine small text-uppercase mb-3" style="letter-spacing:0.1em;">
+                            <i class="bi bi-sliders me-1"></i> Gestión y Estado de la Venta (Editable)
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="field-label" for="editDespachada">
+                                    ESTADO DEL DESPACHO
+                                </label>
+                                <select id="editDespachada" class="field-select form-select">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="En preparación">En preparación</option>
+                                    <option value="Despachada">Despachada</option>
+                                    <option value="Entregado">Entregado</option>
+                                    <option value="Impedimento">Impedimento</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="field-label" for="editEstadoTransaccion">
+                                    ESTADO TRANSACCIÓN
+                                </label>
+                                <select id="editEstadoTransaccion" class="field-select form-select">
+                                    <option value="APROBADA">APROBADA</option>
+                                    <option value="PENDIENTE">PENDIENTE</option>
+                                    <option value="RECHAZADA">RECHAZADA</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="field-label" for="editNota">
+                                    COMENTARIOS / NOTAS DE SEGUIMIENTO
+                                </label>
+                                <textarea id="editNota" class="field-textarea form-control" style="min-height:90px;" placeholder="Ej: Guía de envío #12345, cliente solicita entregar en la tarde..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-pr btn-pr-outline" data-bs-dismiss="modal" type="button">
+                        Cancelar
+                    </button>
+                    <button class="btn-pr btn-pr-wine" id="btnSaveSaleEdit" type="button">
+                        <i class="bi bi-check-circle me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-toast" id="adminToast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname) || window.location.protocol === 'file:';
+            window.__BACKEND_BASE__ = isLocal ? 'http://localhost:3008' : '/api';
+        })();
+    </script>
+    <script src="/data-perfumes.js"></script>
+    <script src="/admin/admin-backend.js"></script>
+    <script src="/admin/history/history.js"></script>
+</body>
+
+</html>

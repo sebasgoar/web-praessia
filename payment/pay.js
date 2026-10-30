@@ -16,12 +16,14 @@ const PAY_CONFIG = {
   shippingCost:     14000,
   shippingFormatted: '$14.000',
   currency:         'COP',
-  boldIntegration:  'TU_INTEGRATION_ID_BOLD', // Reemplazar con tu ID de integración Bold
-  cartStorageKey:   'praessiaCart',           // misma clave que usa tienda.js
+  cartStorageKey:   'praessiaCart',
   emailStorageKey:  'praessiaEmail',
-  savedInfoKey:     'praessiaCustomerInfo',   // localStorage — solo si el usuario acepta guardarla
-  draftKey:         'praessiaCheckoutDraft'   // sessionStorage — borrador mientras completa el form
+  savedInfoKey:     'praessiaCustomerInfo',
+  draftKey:         'praessiaCheckoutDraft',
+  apiBase:          (['localhost', '127.0.0.1', ''].includes(window.location.hostname) || window.location.protocol === 'file:') ? 'http://localhost:3008' : '/api'
 };
+
+let BOLD_PUBLIC_KEY = null;
 
 /* ── DATOS: 32 departamentos de Colombia y sus municipios ──────
    Fuente: DIVIPOLA / Anexo de municipios de Colombia.
@@ -33,13 +35,22 @@ const COLOMBIA_DATA = {"Amazonas": ["Leticia", "Puerto Nariño"], "Antioquia": [
 let cart = [];
 
 /* ── INICIALIZACIÓN ──────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadCart();
 
+  // === MODO PRUEBAS: Llenar datos automáticamente ===
   if (cart.length === 0) {
-    showToast('<i class="bi bi-exclamation-circle me-2"></i>Tu carrito está vacío. Redirigiendo...');
-    setTimeout(() => { window.location.href = '/store'; }, 1800);
-    return;
+    cart = [{ id: 'test', name: 'Perfume de Prueba', price: 100000, qty: 1, image: 'x' }];
+  }
+  
+  prefillTestData();
+  // ==================================================
+
+  try {
+    await initializeBold();
+  } catch (err) {
+    console.error('Error al inicializar Bold:', err);
+    showToast('<i class="bi bi-exclamation-triangle me-2"></i>Error al cargar sistema de pagos.');
   }
 
   renderSummary();
@@ -60,6 +71,33 @@ function loadCart() {
   }
 }
 
+function prefillTestData() {
+  // Empty for production
+}
+
+async function initializeBold() {
+  const res = await fetch(`${PAY_CONFIG.apiBase}/payment/config`);
+  const data = await res.json();
+  if (data.success && data.publicKey) {
+    BOLD_PUBLIC_KEY = data.publicKey.trim();
+
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.bold.co/library/boldPaymentButton.js';
+      script.setAttribute('data-api-key', BOLD_PUBLIC_KEY);
+      script.async = true;
+      script.onload = () => {
+        console.log(`[Bold SDK] Cargado exitosamente en modo (${data.environment})`);
+        resolve();
+      };
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+  } else {
+    throw new Error('No se pudo obtener la configuración de pago');
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────
    RESUMEN DE PEDIDO
 ───────────────────────────────────────────────────────────── */
@@ -72,6 +110,7 @@ function renderSummary() {
   } else {
     itemsWrap.innerHTML = cart.map(item => {
       const hasImg = item.image && item.image !== 'x';
+      const itemTotal = item.price * item.qty;
       return `
       <div class="pay-summary-item">
         <div class="pay-summary-item-img">
@@ -83,8 +122,12 @@ function renderSummary() {
         <div class="pay-summary-item-info">
           <p class="pay-summary-item-name">${escapeHtml(item.name)}</p>
           <p class="pay-summary-item-ref">100 ml · EDP</p>
+          <p class="pay-summary-item-detail">
+            <span class="pay-summary-qty-badge">Cant: ${item.qty}</span> · 
+            <span class="pay-summary-unit-price">${formatCOP(item.price)} c/u</span>
+          </p>
         </div>
-        <span class="pay-summary-item-price">${formatCOP(item.price * item.qty)}</span>
+        <span class="pay-summary-item-price">${formatCOP(itemTotal)}</span>
       </div>`;
     }).join('');
   }
@@ -336,7 +379,7 @@ function collectFormData() {
   return data;
 }
 
-function submitCheckout(e) {
+async function submitCheckout(e) {
   e.preventDefault();
 
   if (cart.length === 0) {
@@ -380,37 +423,129 @@ function submitCheckout(e) {
     btn.innerHTML = '<i class="bi bi-arrow-repeat"></i><span>Redirigiendo a Bold...</span>';
   }
 
-  /* ─ Checkout embebido de Bold ─
-     Documentación: https://docs.bold.co/checkout
-     El backend de Praessia debe generar/validar el hash de integridad
-     y el orderId antes de confirmar el pago (ver notas de seguridad). */
-  if (typeof BoldCheckout !== 'undefined') {
-    const checkout = new BoldCheckout({
-      integrationId:  PAY_CONFIG.boldIntegration,
-      orderId:        generateOrderId(),
-      currency:       PAY_CONFIG.currency,
-      amount:         total,
-      description:    `Praessia · ${cart.length} fragancia(s)`,
-      customerEmail:  formData.email,
-      customerData: {
-        fullName: `${formData.nombre} ${formData.apellidos}`,
-        phone:    formData.telefono,
-        documentNumber: formData.documento,
-        documentType:   formData.tipoDocumento
-      },
-      items,
-      redirectionUrl: `${window.location.origin}/tienda.html?status=success`
+  /* ─ Generación del hash de integridad desde nuestro backend ─ */
+  const orderId = generateOrderId();
+  let hash = '';
+  let cleanAmountStr = String(Math.round(total));
+
+  if (!BOLD_PUBLIC_KEY) {
+    try {
+      await initializeBold();
+    } catch (e) {
+      console.error('Error cargando llave pública de Bold:', e);
+    }
+  }
+  
+  try {
+      const detalles = cart.map(item => {
+        let refId = String(item.id || '').replace('praessia-', '');
+        let refNum = parseInt(refId, 10);
+        return {
+          referencia: isNaN(refNum) ? 1 : refNum,
+          cantidad: Number(item.qty) || 1,
+          valorUnitario: Number(item.price) || 0
+        };
+      });
+      const persona = {
+        documento: formData.documento,
+        tipoDocumento: formData.tipoDocumento,
+        nombre: formData.nombre,
+        apellido: formData.apellidos,
+        telefono: formData.telefono,
+        correo: formData.email,
+        departamento: formData.departamento || '',
+        municipio: formData.municipio || '',
+        direccion: formData.direccion || '',
+        barrio: formData.barrio || ''
+      };
+
+      const hashRes = await fetch(`${PAY_CONFIG.apiBase}/payment/generate-hash`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: orderId,
+          amount: total,
+          currency: PAY_CONFIG.currency,
+          persona: persona,
+          detalles: detalles
+        })
     });
+    const hashData = await hashRes.json();
+    
+    if (hashData.success && hashData.hash) {
+      hash = hashData.hash;
+      if (hashData.amount) {
+        cleanAmountStr = String(hashData.amount);
+      }
+    } else {
+      throw new Error(hashData.message || 'Error al generar el hash de seguridad.');
+    }
+  } catch (error) {
+    console.error('Error obteniendo el hash:', error);
+    showToast('<i class="bi bi-exclamation-triangle me-2"></i>Error de seguridad al conectar con el pago.');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-lock-fill"></i><span>Pagar ahora</span>';
+    }
+    return;
+  }
+
+  if (typeof BoldCheckout !== 'undefined') {
+    const config = {
+      apiKey:         BOLD_PUBLIC_KEY,
+      orderId:        orderId,
+      currency:       PAY_CONFIG.currency,
+      amount:         cleanAmountStr,
+      integritySignature: hash, // Hash generado en el backend
+      description:    'Compra en Praessia',
+      redirectionUrl: `${window.location.origin}/payment/?status=success`
+    };
+    console.log("BoldCheckout config:", config);
+    const checkout = new BoldCheckout(config);
     checkout.open();
+    
+    // Restablecer botón en caso de que el usuario cierre el modal
+    setTimeout(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-lock-fill"></i><span>Pagar ahora</span>';
+      }
+    }, 3000);
   } else {
     console.warn('Praessia: Bold SDK no cargado. Verifica tu PUBLIC_KEY.');
-    showToast('<i class="bi bi-exclamation-triangle me-2"></i>Error al conectar con el sistema de pago. Inténtalo de nuevo.');
+    showToast('<i class="bi bi-exclamation-triangle me-2"></i>Error al cargar Bold. Revisa tu conexión.');
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-lock-fill"></i><span>Pagar ahora</span>';
     }
   }
 }
+
+/* ─ Manejo de redirección post-pago ─ */
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('status') === 'success') {
+    // 1. Limpiar carrito
+    localStorage.removeItem('praessia_cart');
+    sessionStorage.removeItem('praessiaCart');
+    
+    // 2. Mostrar mensaje de éxito
+    const payForm = document.getElementById('payForm');
+    if (payForm) {
+      payForm.innerHTML = `
+        <div class="text-center p-5">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          <h2 class="mt-3" style="font-family:'Bodoni Moda', serif;">¡Pago Exitoso!</h2>
+          <p>Gracias por tu compra. Hemos recibido tu orden y te contactaremos pronto con los detalles de envío.</p>
+          <a href="/" class="btn btn-dark mt-3 px-4 py-2">Volver al inicio</a>
+        </div>
+      `;
+    }
+    
+    // 3. Limpiar URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
 
 /* ─────────────────────────────────────────────────────────────
    EVENTOS

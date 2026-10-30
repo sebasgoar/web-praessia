@@ -12,36 +12,50 @@
 
 'use strict';
 
-/* ── CONFIGURACIÓN ───────────────────────────────────────────── */
+/* ── CONFIGURACIÓN Y ESTADO ─────────────────────────────────── */
 const SHOP_CONFIG = {
-  price:          139900,             // Precio en COP (sin puntos)
+  price: 139900,
   priceFormatted: '$139.900',
-  currency:       'COP',
-  boldIntegration: 'TU_INTEGRATION_ID_BOLD', // Reemplazar con tu ID de integración Bold
-  emailjsServiceId:  'TU_EMAILJS_SERVICE_ID',
-  emailjsTemplateId: 'TU_EMAILJS_TEMPLATE_ID',
-  emailjsPublicKey:  'TU_EMAILJS_PUBLIC_KEY',
-  abandonedCartDelay: 30 * 60 * 1000   // 30 minutos en ms
+  emailjsPublicKey: '',
+  emailjsServiceId: '',
+  emailjsTemplateId: '',
+  abandonedCartDelay: 1800000
 };
 
-/* ── ESTADO ──────────────────────────────────────────────────── */
-let cart          = [];
+let storeProducts = (typeof perfumes !== 'undefined') ? perfumes : [];
 let currentFilter = 'all';
-let searchQuery   = '';
+let searchQuery = '';
+let cart = [];
 let selectedStars = 0;
-let currentModalId = null;
 let abandonedCartTimer = null;
+let currentModalId = null;
 let firebaseReady = false;
 
 /* ── INICIALIZACIÓN ──────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-  emailjs.init(SHOP_CONFIG.emailjsPublicKey);
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof emailjs !== 'undefined' && SHOP_CONFIG.emailjsPublicKey) {
+    emailjs.init(SHOP_CONFIG.emailjsPublicKey);
+  }
   loadCart();
+  await fetchProductsFromApi();
   renderGrid();
   fillReviewSelect();
   bindEvents();
   checkQuizAnchor();
 });
+
+async function fetchProductsFromApi() {
+  try {
+    const apiBase = (['localhost', '127.0.0.1', ''].includes(window.location.hostname) || window.location.protocol === 'file:') ? 'http://localhost:3008' : '/api';
+    const res = await fetch(`${apiBase}/products`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+      storeProducts = data.data;
+    }
+  } catch (e) {
+    console.warn('Praessia Store: usando catálogo local como fallback', e);
+  }
+}
 
 window.addEventListener('firebaseReady', () => {
   firebaseReady = true;
@@ -151,11 +165,12 @@ function buildProductCard(perfume) {
 
 /* ── Filtrado y búsqueda ────────────────────────────────────── */
 function getFilteredPerfumes() {
-  return perfumes.filter(p => {
+  return storeProducts.filter(p => {
+    const matchEstado = p.estado === undefined || Number(p.estado) === 1;
     const matchGender = currentFilter === 'all' || p.gender === currentFilter;
     const matchSearch = searchQuery === '' ||
       p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchGender && matchSearch;
+    return matchEstado && matchGender && matchSearch;
   });
 }
 
@@ -166,7 +181,7 @@ function updateResultsCount(n) {
 
 /* ── Limpieza de nombre para mostrar ───────────────────────── */
 function cleanPerfumeName(name) {
-  const bare = String(name).replace(/^Inspiración Olfativa:\s*/i, '').trim();
+  const bare = String(name).replace(/^Inspiración Olfativa:\s*/i, '').replace(/^Inspiración olfativa:\s*/i, '').trim();
   return `Inspiración olfativa: ${bare}`;
 }
 
@@ -174,11 +189,11 @@ function cleanPerfumeName(name) {
    MODAL FICHA TÉCNICA
 ───────────────────────────────────────────────────────────── */
 function openProductModal(id) {
-  const perfume = perfumes.find(p => p.id === id);
+  const perfume = storeProducts.find(p => p.id === id);
   if (!perfume) return;
 
-  const detail = (typeof PERFUMES_DETAIL !== 'undefined')
-    ? PERFUMES_DETAIL[id] || {} : {};
+  const detail = perfume.detail || ((typeof PERFUMES_DETAIL !== 'undefined')
+    ? PERFUMES_DETAIL[id] || {} : {});
 
   currentModalId = id;
 
@@ -237,7 +252,7 @@ function closeProductModal() {
    CARRITO
 ───────────────────────────────────────────────────────────── */
 function addToCart(id) {
-  const perfume = perfumes.find(p => p.id === id);
+  const perfume = storeProducts.find(p => p.id === id);
   if (!perfume) return;
 
   const existing = cart.find(i => i.id === id);
@@ -289,7 +304,11 @@ function removeFromCart(id) {
 function updateQty(id, delta) {
   const item = cart.find(i => i.id === id);
   if (!item) return;
-  item.qty = Math.max(1, item.qty + delta);
+  if (item.qty + delta <= 0) {
+    removeFromCart(id);
+    return;
+  }
+  item.qty += delta;
   saveCart();
   renderCart();
   updateCartBadge();
@@ -403,42 +422,12 @@ function initCheckout() {
     return;
   }
 
-  /* Guardar email para carrito abandonado */
   if (email) {
     sessionStorage.setItem('praessiaEmail', email);
     cancelAbandonedCartTimer();
   }
 
-  /* ─ Construcción del payload Bold ─
-     Documentación: https://docs.bold.co/checkout
-     Reemplaza SHOP_CONFIG.boldIntegration con tu Integration ID */
-
-  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const items = cart.map(i => ({
-    name:      i.name,
-    quantity:  i.qty,
-    price:     i.price,
-    taxAmount: 0
-  }));
-
-  /* Bold Checkout embebido */
-  if (typeof BoldCheckout !== 'undefined') {
-    const checkout = new BoldCheckout({
-      integrationId: SHOP_CONFIG.boldIntegration,
-      orderId:       generateOrderId(),
-      currency:      SHOP_CONFIG.currency,
-      amount:        total,
-      description:   `Praessia · ${cart.length} fragancia(s)`,
-      customerEmail: email || undefined,
-      items,
-      redirectionUrl: `${window.location.origin}/tienda.html?status=success`
-    });
-    checkout.open();
-  } else {
-    /* Fallback: redirigir a checkout.bold.co con los datos */
-    console.warn('Praessia: Bold SDK no cargado. Verifica tu PUBLIC_KEY.');
-    showToast('<i class="bi bi-exclamation-triangle me-2"></i>Error al conectar con el sistema de pago. Inténtalo de nuevo.');
-  }
+  window.location.href = '/payment/';
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -575,8 +564,8 @@ async function submitReview(e) {
 /* Llenar select de perfumes en el form de reseña */
 function fillReviewSelect() {
   const sel = document.getElementById('reviewPerfume');
-  if (!sel || typeof perfumes === 'undefined') return;
-  perfumes.forEach(p => {
+  if (!sel || typeof storeProducts === 'undefined') return;
+  storeProducts.forEach(p => {
     const opt = document.createElement('option');
     opt.value = cleanPerfumeName(p.name);
     opt.textContent = cleanPerfumeName(p.name);

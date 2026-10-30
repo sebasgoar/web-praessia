@@ -154,11 +154,6 @@
                                     <span class="pay-error" id="err-telefono"></span>
                                 </div>
                             </div>
- 
-                            <label class="pay-check">
-                                <input type="checkbox" id="saveInfo" name="saveInfo">
-                                <span>Guardar la información y consultar más rápido la próxima vez</span>
-                            </label>
                         </section>
  
                         <!-- PAGO -->
@@ -338,11 +333,9 @@
 ════════════════════════════════════════════════ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  
-    <!-- SDK Bold (producción) -->
-    <script src="https://checkout.bold.co/library/bold-checkout.js" data-bold-public-key="TU_PUBLIC_KEY_BOLD"
-        async></script>
+    <!-- SDK Bold (cargado dinámicamente) -->
  
-    <script src="/payment/pay.js"></script>
+    <script src="/payment/pay.js?v=12"></script>
  
 </body>
  

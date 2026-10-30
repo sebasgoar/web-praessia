@@ -126,7 +126,7 @@ function bindLoginEvents() {
   // UI listeners like "Añadir otro producto".
 }
 
-async function attemptLogin() {
+async function firebaseAttemptLogin() {
   if (!db || !FS) {
     showLoginError('Conectando con Firebase, espera un momento...');
     return;
@@ -203,17 +203,21 @@ function showLoginError(msg) {
 }
 
 function enterPanel() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('adminPanel').style.display = 'block';
-  bindAdminEvents();
-  loadAll();
+  const loginScreen = document.getElementById('loginScreen');
+  const adminPanel = document.getElementById('adminPanel');
+  if (loginScreen) loginScreen.style.display = 'none';
+  if (adminPanel) {
+    adminPanel.style.display = 'block';
+    bindAdminEvents();
+    loadAll();
+  } else {
+    window.location.href = '/admin/dashboard/';
+  }
 }
 
 function logout() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('adminPanel').style.display = 'none';
-  document.getElementById('loginInput').value = '';
-  document.getElementById('loginError').style.display = 'none';
+  localStorage.removeItem('authToken');
+  window.location.href = '/admin/';
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -243,6 +247,7 @@ function bindAdminEvents() {
   document.getElementById('btnStep1Continue')?.addEventListener('click', validateAndGoToStep2);
   document.getElementById('btnStep2Back')?.addEventListener('click', goBackToStep1);
   document.getElementById('btnSaveSale')?.addEventListener('click', () => {
+    if (typeof saveSaleBackend === 'function') return;
     if (!validateStep2()) return;
     saveSale();
   });
@@ -252,18 +257,18 @@ function bindAdminEvents() {
   });
   document.getElementById('saleChannel')?.addEventListener('change', toggleExternalSellerField);
 
-  /* Inicializar fecha automática */
-  initializeSaleDate();
+  /* Inicializar fecha automática si está disponible */
+  if (typeof initializeSaleDate === 'function') initializeSaleDate();
 
-  /* Inicializar primer producto */
-  initializeFirstProducts();
+  /* Inicializar primer producto si está disponible */
+  if (typeof initializeFirstProducts === 'function') initializeFirstProducts();
 
   /* Filtro historial */
   document.getElementById('historialFilter')?.addEventListener('change', renderHistorial);
 
   /* Llenar selects */
-  fillSaleSelect();
-  fillReloadItemOptions();
+  if (typeof fillSaleSelect === 'function') fillSaleSelect();
+  if (typeof fillReloadItemOptions === 'function') fillReloadItemOptions();
 }
 
 function navigateTo(section) {
@@ -308,6 +313,7 @@ async function loadAll() {
 
 /* ── Inventario ─────────────────────────────────────────────── */
 async function loadInventory() {
+  if (!FS || !db) return;
   try {
     const { doc, getDoc } = FS;
     const snap = await getDoc(doc(db, 'config', 'inventory'));
@@ -317,6 +323,7 @@ async function loadInventory() {
 }
 
 async function loadInventoryEssences() {
+  if (!FS || !db) return;
   try {
     const { doc, getDoc } = FS;
     const snap = await getDoc(doc(db, 'config', 'inventory_essences'));
@@ -326,6 +333,7 @@ async function loadInventoryEssences() {
 }
 
 async function saveInventory() {
+  if (!FS || !db) return;
   try {
     const { doc, setDoc, serverTimestamp } = FS;
     await setDoc(doc(db, 'config', 'inventory'), { ...inventory, updatedAt: serverTimestamp() });
@@ -333,6 +341,7 @@ async function saveInventory() {
 }
 
 async function saveInventoryEssences() {
+  if (!FS || !db) return;
   try {
     const { doc, setDoc, serverTimestamp } = FS;
     await setDoc(doc(db, 'config', 'inventory_essences'), { ...inventoryEssences, updatedAt: serverTimestamp() });
@@ -341,6 +350,7 @@ async function saveInventoryEssences() {
 
 /* ── Ventas ─────────────────────────────────────────────────── */
 async function loadSales() {
+  if (!FS || !db) return;
   try {
     const { collection, getDocs, query, orderBy } = FS;
     const q = query(collection(db, 'sales'), orderBy('createdAt', 'desc'));
@@ -351,6 +361,7 @@ async function loadSales() {
 
 /* ── Recargas ───────────────────────────────────────────────── */
 async function loadReloads() {
+  if (!FS || !db) return;
   try {
     const { collection, getDocs, query, orderBy } = FS;
     const q = query(collection(db, 'reloads'), orderBy('createdAt', 'desc'));
@@ -361,6 +372,7 @@ async function loadReloads() {
 
 /* ── Producción ─────────────────────────────────────────────── */
 async function loadProduction() {
+  if (!FS || !db) return;
   try {
     const { collection, getDocs, query, orderBy } = FS;
     const q = query(collection(db, 'production'), orderBy('createdAt', 'desc'));
@@ -371,6 +383,7 @@ async function loadProduction() {
 
 /* ── Reseñas ────────────────────────────────────────────────── */
 async function loadReviews() {
+  if (!FS || !db) return;
   try {
     const { collection, getDocs, query, where } = FS;
 
@@ -544,52 +557,34 @@ function renderInventoryEssencesGrid() {
 
     return `
       <tr>
-        <td>${escapeHtml(config.name)}</td>
-        <td>${qty} g</td>
-        <td>${perUnit} g/u</td>
-        <td>${units}</td>
+        <td style="font-weight:600; color:var(--wine-dark);">${escapeHtml(config.name)}</td>
+        <td style="font-weight:600;">${qty}</td>
+        <td>${perUnit}</td>
+        <td style="font-weight:700; color:var(--wine);">${units}</td>
         <td><span class="semaforo ${color}"></span></td>
-        <td>
-          <input type="number" class="qty-inline essence-input" data-product="${productId}" value="${qty}" min="0" aria-label="Stock de ${escapeHtml(config.name)}">
-        </td>
       </tr>`;
   }).join('');
 
   wrap.innerHTML = `
     <div class="admin-table-wrap">
       <div class="admin-table-header">
-        <span class="admin-table-title">Stock de esencias por referencia</span>
+        <span class="admin-table-title"><i class="bi bi-droplet me-2"></i>Stock de esencias por referencia</span>
       </div>
       <div style="overflow-x:auto;">
-        <table class="admin-table" style="min-width:720px;">
+        <table class="admin-table" style="width:100%;">
           <thead>
             <tr>
-              <th>Fragancia</th>
-              <th>Stock (g)</th>
-              <th>Por unidad</th>
+              <th>Producto</th>
+              <th>Stock</th>
+              <th>Por Unidad</th>
               <th>Unidades vendibles</th>
               <th>Estado</th>
-              <th>Editar</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
     </div>`;
-
-  wrap.querySelectorAll('.essence-input').forEach(inp => {
-    inp.addEventListener('change', async () => {
-      const productId = inp.dataset.product;
-      const val = parseFloat(inp.value);
-      if (!isNaN(val) && val >= 0) {
-        inventoryEssences[productId] = val;
-        await saveInventoryEssences();
-        renderInventoryEssencesGrid();
-        renderDashboard();
-        showAdminToast(`${ESSENCE_CONFIG[productId].name} actualizado a ${val}g`);
-      }
-    });
-  });
 }
 
 function buildInvCard(key) {
